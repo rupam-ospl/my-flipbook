@@ -1,0 +1,187 @@
+:root{
+  --opal-bg: #0b0b10;
+  --opal-border: rgba(255,255,255,0.14);
+
+  --opal-maroon: #7b0f1a;
+  --opal-gold: #d7a23a;
+  --opal-text: rgba(255,255,255,0.92);
+  --opal-muted: rgba(255,255,255,0.68);
+
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.55);
+  --shadow-md: 0 12px 30px rgba(0,0,0,0.45);
+  --ring: 0 0 0 4px rgba(215,162,58,0.18);
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  background:
+    radial-gradient(1000px 600px at 20% 10%, rgba(123,15,26,0.22), transparent 55%),
+    radial-gradient(900px 600px at 85% 20%, rgba(215,162,58,0.12), transparent 55%),
+    radial-gradient(900px 600px at 50% 90%, rgba(123,15,26,0.12), transparent 60%),
+    var(--opal-bg);
+  color: var(--opal-text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* Flipbook frame */
+#wrap{
+  width:min(1080px, 96vw);
+  height:min(720px, 82vh);
+  position:relative;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  border: 1px solid var(--opal-border);
+  box-shadow: var(--shadow-lg);
+  overflow:hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fullscreen polish */
+#wrap:fullscreen{
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  background: #0b0b10;
+}
+#wrap:-webkit-full-screen{
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  background: #0b0b10;
+}
+
+#flipbook{
+  width:100%;
+  height:100%;
+}
+
+.page{ background:#fff; }
+
+.page img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+/* subtle vignette overlay */
+#wrap::after{
+  content:"";
+  pointer-events:none;
+  position:absolute;
+  inset:0;
+  box-shadow: inset 0 0 120px rgba(0,0,0,0.35);
+}
+
+/* --- Floating glass toolbar --- */
+.toolbar{
+  position:absolute;
+  left:50%;
+  bottom:14px;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding:10px 12px;
+  border-radius: 999px;
+  background: rgba(10,10,14,0.55);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+
+  transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+  opacity: 1;
+  visibility: visible;
+}
+
+.toolbar.hidden{
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(10px);
+}
+
+.toolbar .status{
+  font-size: 13px;
+  color: var(--opal-muted);
+  padding: 0 6px;
+  white-space: nowrap;
+  user-select:none;
+}
+
+/* --- Slick Opal buttons --- */
+.opal-btn{
+  appearance:none;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+  color: var(--opal-text);
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease, opacity .12s ease;
+  user-select:none;
+}
+
+.opal-btn .icon{
+  width: 18px;
+  height: 18px;
+  display:inline-grid;
+  place-items:center;
+  border-radius: 999px;
+  background: rgba(215,162,58,0.14);
+  border: 1px solid rgba(215,162,58,0.30);
+  color: var(--opal-gold);
+  box-shadow: 0 0 0 1px rgba(215,162,58,0.06) inset;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.opal-btn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(215,162,58,0.35);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35), 0 0 0 1px rgba(215,162,58,0.10) inset;
+}
+.opal-btn:active{ transform: translateY(0px); }
+
+.opal-btn.primary{
+  border-color: rgba(215,162,58,0.40);
+  background: linear-gradient(180deg, rgba(215,162,58,0.20), rgba(123,15,26,0.12));
+}
+.opal-btn.primary:hover{
+  box-shadow: 0 12px 26px rgba(0,0,0,0.40), var(--ring);
+}
+
+.opal-btn:disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+
+/* Smaller “icon-only” button (for fullscreen) */
+.opal-btn.icon-only{
+  padding: 10px 12px;
+  gap: 0;
+}
+.opal-btn.icon-only .icon{
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 520px){
+  .opal-btn span.label{ display:none; }
+  #wrap{ height:min(640px, 82vh); }
+}
