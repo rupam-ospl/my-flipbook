@@ -25,6 +25,12 @@
         <span class="label">Next</span><span class="icon">→</span>
       </button>
 
+      <!-- Mute toggle (new) -->
+      <button id="mute" class="opal-btn icon-only" type="button" aria-label="Mute sound" title="Mute sound">
+        <span class="icon" id="muteIcon">🔊</span>
+      </button>
+
+      <!-- Fullscreen toggle -->
       <button id="fs" class="opal-btn icon-only" type="button" aria-label="Enter fullscreen" title="Fullscreen (F)">
         <span class="icon" id="fsIcon">⛶</span>
       </button>
@@ -48,6 +54,68 @@
 
       const fsBtn = document.getElementById("fs");
       const fsIcon = document.getElementById("fsIcon");
+
+      const muteBtn = document.getElementById("mute");
+      const muteIcon = document.getElementById("muteIcon");
+
+      // ---------------------------
+      // Sound state + persistence
+      // ---------------------------
+      let soundOn = localStorage.getItem("flipbook_sound") !== "off";
+      function updateMuteUI() {
+        muteIcon.textContent = soundOn ? "🔊" : "🔇";
+        muteBtn.setAttribute("aria-label", soundOn ? "Mute sound" : "Unmute sound");
+        muteBtn.title = soundOn ? "Mute sound" : "Unmute sound";
+      }
+      updateMuteUI();
+
+      muteBtn.addEventListener("click", () => {
+        soundOn = !soundOn;
+        localStorage.setItem("flipbook_sound", soundOn ? "on" : "off");
+        updateMuteUI();
+      });
+
+      // ---------------------------
+      // Page flip sound (sound/page.mp3)
+      // ---------------------------
+      const pageSound = new Audio("sound/page.mp3");
+      pageSound.preload = "auto";
+      pageSound.volume = 0.35;
+
+      // Unlock audio after first user gesture (autoplay restrictions)
+      let audioUnlocked = false;
+      function unlockAudioOnce() {
+        if (audioUnlocked) return;
+        audioUnlocked = true;
+
+        const originalVol = pageSound.volume;
+        pageSound.volume = 0; // silent unlock
+        pageSound.play().then(() => {
+          pageSound.pause();
+          pageSound.currentTime = 0;
+          pageSound.volume = originalVol;
+        }).catch(() => {
+          pageSound.volume = originalVol;
+        });
+      }
+      window.addEventListener("pointerdown", unlockAudioOnce, { once: true });
+      window.addEventListener("keydown", unlockAudioOnce, { once: true });
+
+      let lastSoundAt = 0;
+      function playPageSound() {
+        if (!soundOn) return;
+
+        const now = Date.now();
+        if (now - lastSoundAt < 90) return; // prevents double-firing
+        lastSoundAt = now;
+
+        try {
+          pageSound.currentTime = 0;
+          pageSound.play().catch(() => {});
+        } catch (e) {
+          // ignore
+        }
+      }
 
       // Build pages (page-01.png ... page-30.png)
       for (let i = 1; i <= TOTAL_PAGES; i++) {
@@ -84,6 +152,9 @@
       }
       $("#flipbook").bind("turned", updateUI);
       updateUI();
+
+      // Play sound when a page turn starts (best “paper flip” feel)
+      $("#flipbook").bind("turning", playPageSound);
 
       // Controls
       prevBtn.onclick = () => $("#flipbook").turn("previous");
@@ -177,6 +248,7 @@
         if (e.key === "ArrowRight") $("#flipbook").turn("next");
         if (e.key.toLowerCase() === "f") toggleFullscreen();
         if (e.key.toLowerCase() === "h") toggleToolbar();
+        if (e.key.toLowerCase() === "m") muteBtn.click(); // bonus: M toggles mute
       });
     });
   </script>
